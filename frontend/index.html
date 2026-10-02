@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ConectaPet - Conectando Amigos de Quatro Patas</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <a href="index.html" class="logo">🐾 ConectaPet</a>
+      <ul class="nav-links">
+        <li><a href="index.html">Início</a></li>
+        <li><a href="ongs.html">ONGs</a></li>
+        <li><a href="campanhas.html">Campanhas</a></li>
+        <li id="nav-auth"><a href="login.html" class="btn btn-outline">Entrar</a></li>
+        <li><button id="btn-contrast" class="btn btn-outline" style="padding: 0.3rem 0.6rem;">👁️ Contraste</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>Aponte o amor na direção certa.</h1>
+      <p>Conectamos você diretamente a ONGs de proteção animal verificadas e transparentes. Escolha como e quem ajudar hoje!</p>
+      <div class="hero-buttons">
+        <a href="ongs.html" class="btn btn-primary" style="background-color: #ffffff; color: var(--primary-color);">Quero Ajudar</a>
+        <a href="cadastro.html" class="btn btn-outline" style="border-color: #ffffff; color: #ffffff;">Sou uma ONG</a>
+      </div>
+    </section>
+
+    <section>
+      <h2 style="margin-bottom: 1rem;">Nosso Impacto em Números</h2>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-number" id="stat-ongs">0</div><p>ONGs Verificadas</p></div>
+        <div class="stat-card"><div class="stat-number" id="stat-doacoes">0</div><p>Doações Realizadas</p></div>
+        <div class="stat-card"><div class="stat-number">150+</div><p>Animais Beneficiados</p></div>
+        <div class="stat-card"><div class="stat-number" id="stat-campanhas">0</div><p>Campanhas Ativas</p></div>
+      </div>
+    </section>
+
+    <section style="margin-top: 2rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>ONGs em Destaque</h2>
+        <a href="ongs.html" style="color: var(--primary-color); font-weight: bold;">Ver todas →</a>
+      </div>
+      <div id="container-ongs" class="grid-cards"><p>Carregando ONGs...</p></div>
+    </section>
+
+    <section style="margin-top: 3rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>Campanhas Ativas</h2>
+        <a href="campanhas.html" style="color: var(--primary-color); font-weight: bold;">Ver todas →</a>
+      </div>
+      <div id="container-campanhas" class="grid-cards"><p>Carregando campanhas...</p></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 ConectaPet - Plataforma Acadêmica de Proteção Animal.</p>
+  </footer>
+
+  <script src="js/main.js"></script>
+
+  <!-- Widget VLibras -->
+  <div vw="true" class="enabled">
+    <div vw-access-button="true" class="active"></div>
+    <div vw-plugin-wrapper="true">
+      <div class="vw-plugin-top-wrapper"></div>
+    </div>
+  </div>
+  <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+  <script>
+    new window.VLibras.Widget('https://vlibras.gov.br/app');
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ONGs Cadastradas - ConectaPet</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <a href="index.html" class="logo">🐾 ConectaPet</a>
+      <ul class="nav-links">
+        <li><a href="index.html">Início</a></li>
+        <li><a href="ongs.html">ONGs</a></li>
+        <li><a href="campanhas.html">Campanhas</a></li>
+        <li id="nav-auth"><a href="login.html" class="btn btn-outline">Entrar</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <h2>Instituições e ONGs de Proteção Animal</h2>
+    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Instituições com selo de verificação ativado na plataforma.</p>
+
+    <div class="card" style="margin-bottom: 2rem;">
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <input type="text" id="filtro-busca" placeholder="Buscar por nome ou palavra-chave..." style="flex: 2; min-width: 200px; padding: 0.6rem; border: 1px solid var(--border-color); border-radius: var(--radius);">
+        <input type="text" id="filtro-cidade" placeholder="Filtrar por cidade..." style="flex: 1; min-width: 150px; padding: 0.6rem; border: 1px solid var(--border-color); border-radius: var(--radius);">
+        <button onclick="buscarOngs()" class="btn btn-primary">Pesquisar</button>
+      </div>
+    </div>
+
+    <div id="lista-ongs" class="grid-cards">
+      <p>Buscando instituições...</p>
+    </div>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script>
+    async function buscarOngs() {
+      const busca = document.getElementById('filtro-busca').value;
+      const cidade = document.getElementById('filtro-cidade').value;
+      const container = document.getElementById('lista-ongs');
+
+      try {
+        const url = new URL('/api/ongs', window.location.origin);
+        if (busca) url.searchParams.append('busca', busca);
+        if (cidade) url.searchParams.append('cidade', cidade);
+
+        const res = await fetch(url);
+        const ongs = await res.json();
+
+        if (ongs.length === 0) {
+          container.innerHTML = '<p>Nenhuma ONG encontrada com esses critérios.</p>';
+          return;
+        }
+
+        container.innerHTML = ongs.map(ong => `
+          <article class="card">
+            <div>
+              <span class="badge badge-verified">✓ ${ong.status_verificacao}</span>
+              <h3 style="margin: 0.5rem 0; color: var(--primary-color);">${ong.nome}</h3>
+              <p style="color: var(--text-muted); font-size: 0.85rem;">📍 ${ong.cidade} - ${ong.estado} | CNPJ: ${ong.cnpj}</p>
+              <p style="margin-top: 0.8rem;">${ong.descricao || 'Sem descrição cadastrada.'}</p>
+              <p style="margin-top: 0.5rem; font-size: 0.9rem;">📞 <strong>Contato:</strong> ${ong.telefone || 'Não informado'}</p>
+            </div>
+            <div style="margin-top: 1.5rem;">
+              <a href="doacao.html?ong=${ong.id}" class="btn btn-secondary" style="width: 100%; text-align: center;">Fazer Doação</a>
+            </div>
+          </article>
+        `).join('');
+      } catch (err) {
+        container.innerHTML = '<p>Erro ao buscar ONGs no servidor.</p>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', buscarOngs);
+  </script>
+</body>
+</html>

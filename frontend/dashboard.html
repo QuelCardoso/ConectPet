@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel de Controle - ConectaPet</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <a href="index.html" class="logo">🐾 ConectaPet</a>
+      <ul class="nav-links">
+        <li><a href="index.html">Início</a></li>
+        <li><a href="ongs.html">ONGs</a></li>
+        <li><button onclick="fazerLogout()" class="btn btn-outline" style="border-color: var(--danger-color); color: var(--danger-color);">Sair</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+      <div>
+        <h2 id="dash-titulo">Painel de Controle</h2>
+        <p id="dash-subtitulo" style="color: var(--text-muted);">Carregando informações do seu perfil...</p>
+      </div>
+      <span id="dash-tipo-badge" class="badge badge-verified" style="font-size: 0.9rem; padding: 0.5rem 1rem;">Perfil</span>
+    </div>
+
+    <!-- Área 1: Visão Geral do Doador -->
+    <section id="painel-doador" style="display: none;">
+      <h3 style="margin-bottom: 1rem; color: var(--primary-color);">Minhas Doações Realizadas</h3>
+      <div id="tabela-doacoes-doador" class="card">
+        <p>Carregando seu histórico de doações...</p>
+      </div>
+    </section>
+
+    <!-- Área 2: Visão Geral da ONG -->
+    <section id="painel-ong" style="display: none;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        
+        <!-- Formulário para Cadastrar Necessidade -->
+        <div class="card">
+          <h3 style="color: var(--primary-color); margin-bottom: 1rem;">➕ Cadastrar Necessidade</h3>
+          <form id="form-nova-necessidade">
+            <div style="margin-bottom: 0.8rem;">
+              <label style="display: block; font-weight: 600; font-size: 0.9rem;">Título</label>
+              <input type="text" id="nec-titulo" required placeholder="Ex: Ração para Cães" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: var(--radius);">
+            </div>
+            <div style="margin-bottom: 0.8rem;">
+              <label style="display: block; font-weight: 600; font-size: 0.9rem;">Categoria</label>
+              <select id="nec-categoria" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: var(--radius);">
+                <option value="Ração">Ração</option>
+                <option value="Medicamentos">Medicamentos</option>
+                <option value="Produtos de Higiene">Produtos de Higiene</option>
+                <option value="Outros">Outros</option>
+              </select>
+            </div>
+            <div style="margin-bottom: 0.8rem;">
+              <label style="display: block; font-weight: 600; font-size: 0.9rem;">Quantidade</label>
+              <input type="number" id="nec-quantidade" min="1" value="10" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: var(--radius);">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Publicar Necessidade</button>
+          </form>
+        </div>
+
+        <!-- Formulário para Criar Campanha -->
+        <div class="card">
+          <h3 style="color: var(--secondary-color); margin-bottom: 1rem;">🎯 Criar Nova Campanha</h3>
+          <form id="form-nova-campanha">
+            <div style="margin-bottom: 0.8rem;">
+              <label style="display: block; font-weight: 600; font-size: 0.9rem;">Título da Campanha</label>
+              <input type="text" id="camp-titulo" required placeholder="Ex: Reforma do Gatil" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: var(--radius);">
+            </div>
+            <div style="margin-bottom: 0.8rem;">
+              <label style="display: block; font-weight: 600; font-size: 0.9rem;">Meta Financeira (R$)</label>
+              <input type="number" id="camp-meta" min="100" step="50" value="1000" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: var(--radius);">
+            </div>
+            <div style="margin-bottom: 0.8rem;">
+              <label style="display: block; font-weight: 600; font-size: 0.9rem;">Descrição</label>
+              <textarea id="camp-desc" rows="2" placeholder="Resumo do objetivo..." style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: var(--radius);"></textarea>
+            </div>
+            <button type="submit" class="btn btn-secondary" style="width: 100%;">Lançar Campanha</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Área 3: Visão Geral do Administrador -->
+    <section id="painel-admin" style="display: none;">
+      <h3 style="margin-bottom: 1rem; color: var(--primary-color);">Gestão e Aprovação de ONGs</h3>
+      <div id="tabela-ongs-admin" class="card">
+        <p>Carregando instituições cadastradas...</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

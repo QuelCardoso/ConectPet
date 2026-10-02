@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro - ConectaPet</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <a href="index.html" class="logo">🐾 ConectaPet</a>
+      <ul class="nav-links">
+        <li><a href="index.html">Início</a></li>
+        <li><a href="login.html" class="btn btn-outline">Entrar</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main style="max-width: 500px;">
+    <section class="card" style="margin-top: 2rem;">
+      <h2 style="color: var(--primary-color); text-align: center; margin-bottom: 1.5rem;">Crie sua Conta</h2>
+      
+      <div id="msg" style="display: none; padding: 0.8rem; border-radius: var(--radius); margin-bottom: 1rem; font-size: 0.9rem;"></div>
+
+      <form id="form-cadastro">
+        <div style="margin-bottom: 1rem;">
+          <label for="nome" style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Nome Completo / Nome da ONG</label>
+          <input type="text" id="nome" required placeholder="Digite seu nome" style="width: 100%; padding: 0.7rem; border: 1px solid var(--border-color); border-radius: var(--radius);">
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          <label for="email" style="display: block; font-weight: 600; margin-bottom: 0.4rem;">E-mail</label>
+          <input type="email" id="email" required placeholder="seuemail@exemplo.com" style="width: 100%; padding: 0.7rem; border: 1px solid var(--border-color); border-radius: var(--radius);">
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          <label for="senha" style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Senha</label>
+          <input type="password" id="senha" required minlength="6" placeholder="Mínimo 6 caracteres" style="width: 100%; padding: 0.7rem; border: 1px solid var(--border-color); border-radius: var(--radius);">
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+          <label for="tipo_usuario" style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Perfil de Acesso</label>
+          <select id="tipo_usuario" style="width: 100%; padding: 0.7rem; border: 1px solid var(--border-color); border-radius: var(--radius);">
+            <option value="DOADOR">Doador / Apoiador</option>
+            <option value="ONG">Instituição / ONG de Proteção Animal</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Finalizar Cadastro</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script>
+    document.getElementById('form-cadastro').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nome = document.getElementById('nome').value;
+      const email = document.getElementById('email').value;
+      const senha = document.getElementById('senha').value;
+      const tipo_usuario = document.getElementById('tipo_usuario').value;
+      const msg = document.getElementById('msg');
+
+      try {
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nome, email, senha, tipo_usuario })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          msg.style.backgroundColor = '#fed7d7';
+          msg.style.color = '#9b2c2c';
+          msg.innerText = data.erro || 'Erro ao cadastrar.';
+          msg.style.display = 'block';
+          return;
+        }
+
+        msg.style.backgroundColor = '#c6f6d5';
+        msg.style.color = '#22543d';
+        msg.innerText = 'Cadastro realizado com sucesso! Redirecionando...';
+        msg.style.display = 'block';
+
+        setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+      } catch (err) {
+        msg.style.backgroundColor = '#fed7d7';
+        msg.style.color = '#9b2c2c';
+        msg.innerText = 'Erro de conexão com o servidor.';
+        msg.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>

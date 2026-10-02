@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - ConectaPet</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <a href="index.html" class="logo">🐾 ConectaPet</a>
+      <ul class="nav-links">
+        <li><a href="index.html">Início</a></li>
+        <li><a href="ongs.html">ONGs</a></li>
+        <li><a href="cadastro.html" class="btn btn-primary">Criar Conta</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main style="max-width: 450px;">
+    <section class="card" style="margin-top: 2rem;">
+      <h2 style="color: var(--primary-color); text-align: center; margin-bottom: 1.5rem;">Entrar no ConectaPet</h2>
+      
+      <div id="mensagem-erro" style="display: none; background-color: #fed7d7; color: #9b2c2c; padding: 0.8rem; border-radius: var(--radius); margin-bottom: 1rem; font-size: 0.9rem;"></div>
+
+      <form id="form-login">
+        <div style="margin-bottom: 1rem;">
+          <label for="email" style="display: block; font-weight: 600; margin-bottom: 0.4rem;">E-mail</label>
+          <input type="email" id="email" required placeholder="seuemail@exemplo.com" style="width: 100%; padding: 0.7rem; border: 1px solid var(--border-color); border-radius: var(--radius);">
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+          <label for="senha" style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Senha</label>
+          <input type="password" id="senha" required placeholder="••••••••" style="width: 100%; padding: 0.7rem; border: 1px solid var(--border-color); border-radius: var(--radius);">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Acessar Conta</button>
+      </form>
+
+      <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem;">
+        <p>Ainda não tem conta? <a href="cadastro.html" style="color: var(--primary-color); font-weight: bold;">Cadastre-se</a></p>
+      </div>
+
+      <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color); font-size: 0.8rem; color: var(--text-muted);">
+        <p><strong>Contas de teste (Senha: 123456):</strong></p>
+        <ul>
+          <li>Admin: admin@conectapet.org</li>
+          <li>Doador: raquel@email.com</li>
+          <li>ONG: contato@patasamigas.org</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script>
+    document.getElementById('form-login').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const senha = document.getElementById('senha').value;
+      const msgErro = document.getElementById('mensagem-erro');
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, senha })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          msgErro.innerText = data.erro || 'Erro ao realizar login.';
+          msgErro.style.display = 'block';
+          return;
+        }
+
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('usuario', JSON.stringify(data.usuario));
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        msgErro.innerText = 'Erro de conexão com o servidor.';
+        msgErro.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>
