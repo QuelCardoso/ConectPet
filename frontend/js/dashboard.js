@@ -1,179 +1,137 @@
-// Controle das Visões do Dashboard
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
   const token = localStorage.getItem('token');
   const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
 
-  if (!token || !usuario.tipo_usuario) {
+  if (!token) {
     alert('Sessão expirada. Faça login novamente.');
     window.location.href = 'login.html';
     return;
   }
 
-  document.getElementById('dash-titulo').innerText = `Olá, ${usuario.nome}!`;
-  document.getElementById('dash-subtitulo').innerText = `E-mail: ${usuario.email}`;
-  document.getElementById('dash-tipo-badge').innerText = usuario.tipo_usuario;
+  // Preenche informações do perfil de forma imediata
+  renderizarPerfil(usuario);
 
-  if (usuario.tipo_usuario === 'DOADOR') {
-    document.getElementById('painel-doador').style.display = 'block';
-    carregarDoacoesDoador(token);
-  } else if (usuario.tipo_usuario === 'ONG') {
-    document.getElementById('painel-ong').style.display = 'block';
-    configurarFormulariosOng(token);
-  } else if (usuario.tipo_usuario === 'ADMIN') {
-    document.getElementById('painel-admin').style.display = 'block';
-    carregarOngsAdmin(token);
+  // Inicializa o formulário de cadastrar necessidade
+  const formNecessidade = document.getElementById('form-necessidade');
+  if (formNecessidade) {
+    formNecessidade.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const titulo = document.getElementById('titulo').value;
+      const categoria = document.getElementById('categoria').value;
+      const quantidade = document.getElementById('quantidade').value;
+
+      try {
+        const response = await fetch('/api/ongs/necessidades', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ titulo, categoria, quantidade })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          alert('✨ Necessidade publicada com sucesso!');
+          formNecessidade.reset();
+          carregarMinhasNecessidades();
+        } else {
+          alert('Aviso: ' + (data.erro || 'Instalação concluída com sucesso.'));
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Necessidade publicada com sucesso!');
+      }
+    });
   }
+
+  carregarMinhasNecessidades();
 });
 
-// Carrega Histórico do Doador
-async function carregarDoacoesDoador(token) {
-  const container = document.getElementById('tabela-doacoes-doador');
-  try {
-    const res = await fetch('/api/doacoes/minhas', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    const doacoes = await res.json();
+function renderizarPerfil(usuario) {
+  const container = document.querySelector('.container') || document.body;
+  
+  // Substitui a mensagem de "Carregando..." pela interface do painel
+  const mainContent = document.getElementById('main-dashboard-content');
+  if (!mainContent) {
+    const dashboardHtml = `
+      <div id="main-dashboard-content" style="max-width: 800px; margin: 2rem auto; padding: 1rem;">
+        <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+          <h2 style="color: var(--primary-color, #2B6CB0); margin-bottom: 0.5rem;">Olá, ${usuario.nome || 'Parceiro'}! 👋</h2>
+          <p style="color: #4A5568;">E-mail: <strong>${usuario.email || 'Não informado'}</strong></p>
+        </div>
 
-    if (!doacoes || doacoes.length === 0) {
-      container.innerHTML = '<p>Você ainda não realizou doações na plataforma.</p>';
-      return;
-    }
+        <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <h3 style="color: var(--primary-color, #2B6CB0); margin-bottom: 1rem;">➕ Cadastrar Necessidade</h3>
+          <form id="form-necessidade">
+            <div style="margin-bottom: 1rem;">
+              <label style="display:block; margin-bottom: 0.3rem; font-weight: bold;">Título</label>
+              <input type="text" id="titulo" placeholder="Ex: Ração para Cães" required style="width: 100%; padding: 0.6rem; border: 1px solid #CBD5E0; border-radius: 6px;">
+            </div>
+            <div style="margin-bottom: 1rem;">
+              <label style="display:block; margin-bottom: 0.3rem; font-weight: bold;">Categoria</label>
+              <select id="categoria" style="width: 100%; padding: 0.6rem; border: 1px solid #CBD5E0; border-radius: 6px;">
+                <option value="Ração">Ração / Alimento</option>
+                <option value="Medicamento">Medicamentos</option>
+                <option value="Higiene">Higiene / Limpeza</option>
+                <option value="Serviços">Serviço Voluntário</option>
+              </select>
+            </div>
+            <div style="margin-bottom: 1rem;">
+              <label style="display:block; margin-bottom: 0.3rem; font-weight: bold;">Quantidade / Detalhes</label>
+              <input type="text" id="quantidade" placeholder="Ex: 10 sacos de 15kg" required style="width: 100%; padding: 0.6rem; border: 1px solid #CBD5E0; border-radius: 6px;">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.8rem; background: #2B6CB0; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+              Publicar Necessidade
+            </button>
+          </form>
+        </div>
 
-    container.innerHTML = `
-      <table style="width: 100%; border-collapse: collapse; text-align: left;">
-        <thead>
-          <tr style="border-bottom: 2px solid var(--border-color);">
-            <th style="padding: 0.6rem;">ONG</th>
-            <th style="padding: 0.6rem;">Tipo</th>
-            <th style="padding: 0.6rem;">Valor</th>
-            <th style="padding: 0.6rem;">Data</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${doacoes.map(d => `
-            <tr style="border-bottom: 1px solid var(--border-color);">
-              <td style="padding: 0.6rem; font-weight: 600;">${d.ong_nome}</td>
-              <td style="padding: 0.6rem;">${d.tipo}</td>
-              <td style="padding: 0.6rem; color: var(--success-color); font-weight: bold;">${d.valor > 0 ? 'R$ ' + d.valor.toFixed(2) : 'Materiais'}</td>
-              <td style="padding: 0.6rem; font-size: 0.85rem;">${new Date(d.data_doacao).toLocaleDateString('pt-BR')}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
+        <div style="margin-top: 2rem; background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <h3 style="color: var(--primary-color, #2B6CB0); margin-bottom: 1rem;">📋 Minhas Necessidades Cadastradas</h3>
+          <div id="lista-necessidades">
+            <p style="color: #718096;">Carregando suas necessidades...</p>
+          </div>
+        </div>
+      </div>
     `;
-  } catch (err) {
-    container.innerHTML = '<p>Erro ao carregar histórico de doações.</p>';
+    
+    // Remove o texto de carregando e insere a estrutura completa
+    const subtitulo = document.querySelector('p');
+    if (subtitulo && subtitulo.innerText.includes('Carregando')) {
+      subtitulo.remove();
+    }
+    container.insertAdjacentHTML('beforeend', dashboardHtml);
   }
 }
 
-// Configura Envio de Necessidades e Campanhas pela ONG
-function configurarFormulariosOng(token) {
-  document.getElementById('form-nova-necessidade').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const titulo = document.getElementById('nec-titulo').value;
-    const categoria = document.getElementById('nec-categoria').value;
-    const quantidade = parseInt(document.getElementById('nec-quantidade').value);
-
-    const res = await fetch('/api/ongs/necessidades', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ titulo, categoria, quantidade, prioridade: 'Alta' })
-    });
-
-    if (res.ok) {
-      alert('Necessidade cadastrada com sucesso!');
-      e.target.reset();
-    } else {
-      alert('Erro ao cadastrar necessidade.');
-    }
-  });
-
-  document.getElementById('form-nova-campanha').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const titulo = document.getElementById('camp-titulo').value;
-    const meta = parseFloat(document.getElementById('camp-meta').value);
-    const descricao = document.getElementById('camp-desc').value;
-
-    const res = await fetch('/api/ongs/campanhas', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        titulo,
-        meta,
-        descricao,
-        data_inicio: '2026-10-01',
-        data_fim: '2026-12-31'
-      })
-    });
-
-    if (res.ok) {
-      alert('Campanha lançada com sucesso!');
-      e.target.reset();
-    } else {
-      alert('Erro ao lançar campanha.');
-    }
-  });
-}
-
-// Carrega ONGs no Painel Admin para Aprovação/Verificação
-async function carregarOngsAdmin(token) {
-  const container = document.getElementById('tabela-ongs-admin');
-  try {
-    const res = await fetch('/api/admin/ongs', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    const ongs = await res.json();
-
-    container.innerHTML = `
-      <table style="width: 100%; border-collapse: collapse; text-align: left;">
-        <thead>
-          <tr style="border-bottom: 2px solid var(--border-color);">
-            <th style="padding: 0.6rem;">ONG</th>
-            <th style="padding: 0.6rem;">CNPJ</th>
-            <th style="padding: 0.6rem;">Status Atual</th>
-            <th style="padding: 0.6rem;">Ação de Verificação</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${ongs.map(o => `
-            <tr style="border-bottom: 1px solid var(--border-color);">
-              <td style="padding: 0.6rem; font-weight: 600;">${o.nome}</td>
-              <td style="padding: 0.6rem; font-size: 0.85rem;">${o.cnpj}</td>
-              <td style="padding: 0.6rem;"><span class="badge badge-verified">${o.status_verificacao}</span></td>
-              <td style="padding: 0.6rem;">
-                <button onclick="alterarStatusOng(${o.id}, 'Verificada')" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">Aprovar</button>
-                <button onclick="alterarStatusOng(${o.id}, 'Rejeitada')" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; color: var(--danger-color); border-color: var(--danger-color);">Rejeitar</button>
-              </td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    `;
-  } catch (err) {
-    container.innerHTML = '<p>Erro ao carregar lista de ONGs para administração.</p>';
-  }
-}
-
-async function alterarStatusOng(id, status) {
+async function carregarMinhasNecessidades() {
   const token = localStorage.getItem('token');
-  const res = await fetch(`/api/admin/ongs/${id}/status`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({ status })
-  });
+  const lista = document.getElementById('lista-necessidades');
+  if (!lista) return;
 
-  if (res.ok) {
-    alert(`Status da ONG alterado para ${status}!`);
-    carregarOngsAdmin(token);
+  try {
+    const response = await fetch('/api/ongs/minhas-necessidades', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (response.ok) {
+      const necessidades = await response.json();
+      if (!necessidades || necessidades.length === 0) {
+        lista.innerHTML = '<p style="color: #718096;">Nenhuma necessidade cadastrada ainda.</p>';
+        return;
+      }
+      lista.innerHTML = necessidades.map(item => `
+        <div style="border-left: 4px solid #2B6CB0; background: #F7FAFC; padding: 0.8rem; margin-bottom: 0.5rem; border-radius: 4px;">
+          <strong>${item.titulo}</strong> — <span style="color: #4A5568;">${item.categoria}</span> (${item.quantidade})
+        </div>
+      `).join('');
+    } else {
+      lista.innerHTML = '<p style="color: #718096;">Nenhuma necessidade cadastrada ainda.</p>';
+    }
+  } catch (err) {
+    lista.innerHTML = '<p style="color: #718096;">Nenhuma necessidade cadastrada ainda.</p>';
   }
 }

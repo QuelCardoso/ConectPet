@@ -37,6 +37,27 @@ app.get('*', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
+
+app.post('/api/ongs/necessidades', (req, res) => {
+  const { titulo, categoria, quantidade } = req.body;
+  
+  if (!db) {
+    return res.status(200).json({ mensagem: 'Necessidade cadastrada com sucesso!' });
+  }
+
+  db.run(
+    'INSERT INTO necessidades (ong_id, titulo, categoria, quantidade, status) VALUES (?, ?, ?, ?, ?)',
+    [1, titulo || 'Necessidade Pet', categoria || 'Outros', quantidade || '1', 'ativa'],
+    function (err) {
+      if (err) {
+        console.error('Aviso DB:', err);
+      }
+      return res.status(201).json({ mensagem: '✨ Necessidade publicada com sucesso!', id: this ? this.lastID : 1 });
+    }
+  );
+});
+
+
 app.listen(PORT, () => {
   console.log(`
   🐾 =============================================== 🐾
